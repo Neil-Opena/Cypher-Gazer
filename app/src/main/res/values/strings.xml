@@ -1,3 +1,4 @@
 <resources>
     <string name="app_name">CypherGazer</string>
+    <string name="textfield_label">This is a test</string>
 </resources>
