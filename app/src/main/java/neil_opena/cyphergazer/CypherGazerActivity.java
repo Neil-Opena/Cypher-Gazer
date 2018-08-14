@@ -4,11 +4,8 @@ import android.os.Bundle;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
 import android.support.v7.app.AppCompatActivity;
-import android.support.v7.widget.Toolbar;
 
 public class CypherGazerActivity extends AppCompatActivity {
-
-    private Toolbar mToolbar;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -23,7 +20,5 @@ public class CypherGazerActivity extends AppCompatActivity {
             fm.beginTransaction().add(R.id.fragment_container, fragment).commit();
         }
 
-        mToolbar = findViewById(R.id.toolbar);
-        setSupportActionBar(mToolbar);
     }
 }
