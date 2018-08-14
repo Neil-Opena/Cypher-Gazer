@@ -1,4 +1,9 @@
 <resources>
-    <string name="app_name">CypherGazer</string>
-    <string name="textfield_label">This is a test</string>
+    <string name="app_name">Cypher Gazer</string>
+    <string name="app_description">Encode or decode information while observing how it all works!</string>
+    <string name="encrypt">Encrypt</string>
+    <string name="encrypt_hint">Enter text to encrypt!</string>
+    <string name="decrypt">Decrypt</string>
+    <string name="decrypt_hint">Enter text to decrypt!</string>
+
 </resources>
