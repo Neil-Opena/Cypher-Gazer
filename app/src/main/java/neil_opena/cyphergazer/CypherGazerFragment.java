@@ -1,18 +1,12 @@
 package neil_opena.cyphergazer;
 
 import android.os.Bundle;
+import android.support.v4.app.Fragment;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 
-import com.google.android.material.card.MaterialCardView;
-
-import androidx.fragment.app.Fragment;
-
 public class CypherGazerFragment extends Fragment{
-
-    private MaterialCardView mPlainTextCard;
-    private MaterialCardView mCryptTextCard;
 
     public static CypherGazerFragment newInstance(){
         return new CypherGazerFragment();
@@ -26,16 +20,6 @@ public class CypherGazerFragment extends Fragment{
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         View v = inflater.inflate(R.layout.fragment_cypher_gazer, container, false);
-
-        mPlainTextCard = (MaterialCardView) v.findViewById(R.id.plain_text_card);
-        mPlainTextCard.setOnClickListener(new View.OnClickListener(){
-            @Override
-            public void onClick(View v){
-                mCryptTextCard.setBackgroundColor(getResources().getColor(R.color.clouds));
-            }
-        });
-
-        mCryptTextCard = (MaterialCardView) v.findViewById(R.id.crypt_text_card);
 
         return v;
 
