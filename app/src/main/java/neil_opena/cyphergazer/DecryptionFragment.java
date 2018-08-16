@@ -1,12 +1,10 @@
-package neil_opena.cyphergazer.Cyphers;
+package neil_opena.cyphergazer;
 
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-
-import neil_opena.cyphergazer.R;
 
 public class DecryptionFragment extends Fragment{
 

@@ -14,8 +14,6 @@ import android.view.MenuItem;
 import java.util.ArrayList;
 import java.util.List;
 
-import neil_opena.cyphergazer.Cyphers.DecryptionFragment;
-
 public class CypherGazerActivity extends AppCompatActivity {
 
     Toolbar mToolbar;

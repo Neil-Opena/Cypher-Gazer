@@ -23,4 +23,6 @@ public class EncryptionFragment extends Fragment{
 
         return v;
     }
+
+    //add progress view
 }
