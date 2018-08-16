@@ -1,8 +1,6 @@
 package neil_opena.cyphergazer;
 
-import android.graphics.drawable.Icon;
 import android.os.Bundle;
-import android.support.annotation.Nullable;
 import android.support.design.widget.TabLayout;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
