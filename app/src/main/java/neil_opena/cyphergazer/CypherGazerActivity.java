@@ -122,9 +122,10 @@ public class CypherGazerActivity extends AppCompatActivity {
         ArrayList<String> stringList = new ArrayList<>(Arrays.asList(getResources().getStringArray(R.array.cyphers)));
         for(String string : stringList){
             try{
-
+                string = getString(R.string.cypher_package) + string;
                 Class cypherClass = Class.forName(string);
                 Cypher cypherInstance = (Cypher) cypherClass.getConstructors()[0].newInstance();
+                mCypherList.add(cypherInstance);
             }catch(ClassNotFoundException ex){
 
             }catch (IllegalAccessException e) {
