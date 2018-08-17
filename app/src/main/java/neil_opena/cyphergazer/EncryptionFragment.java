@@ -74,6 +74,9 @@ public class EncryptionFragment extends Fragment {
                     showErrorDialog();
                 }
 
+                mPlainTextEdit.setText(mCypher);
+                //FIXMe delete lol
+
                 //card increase in length
                 //showing a textview where decrypted text is shown (phase 1)
                 //shows how text is encrypted (phase 2)
@@ -92,7 +95,6 @@ public class EncryptionFragment extends Fragment {
         if(requestCode == REQUEST_CYPHER){
             mCypher = data.getStringExtra(Settings.SELECTED_CYPHER);
             mCypherId = data.getIntExtra(Settings.SELECTED_ID, 0);
-            mPlainTextEdit.setText(mCypher);
         }
     }
 

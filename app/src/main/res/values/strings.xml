@@ -19,5 +19,6 @@
     <!-- Cyphers -->
     <string name="cypher_caesar">Caesar</string>
     <string name="cypher_caesar2">Caesar2</string>
+    <string name="packageName">neil_opena.cyphergazer.Cyphers.</string>
 
 </resources>

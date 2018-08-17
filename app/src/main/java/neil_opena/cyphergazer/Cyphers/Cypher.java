@@ -1,5 +1,6 @@
 package neil_opena.cyphergazer.Cyphers;
 
+
 public interface Cypher {
 
     String encrypt(String plainText, String key);
