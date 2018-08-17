@@ -8,6 +8,7 @@ import android.os.Bundle;
 
 import androidx.appcompat.app.AlertDialog;
 import androidx.fragment.app.Fragment;
+import neil_opena.cyphergazer.Cyphers.Cypher;
 
 import android.view.LayoutInflater;
 import android.view.View;
@@ -17,6 +18,8 @@ import android.view.inputmethod.InputMethodManager;
 import com.google.android.material.button.MaterialButton;
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
 import com.google.android.material.textfield.TextInputEditText;
+
+import java.lang.reflect.InvocationTargetException;
 
 public class EncryptionFragment extends Fragment {
 
@@ -28,7 +31,7 @@ public class EncryptionFragment extends Fragment {
     private FloatingActionButton mPlayButton;
     private MaterialButton mSettingsButton;
 
-    private String mCypher;
+    private Cypher mCypher;
     private String mKey;
     private int mCypherId;
 
@@ -57,7 +60,7 @@ public class EncryptionFragment extends Fragment {
         mSettingsButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                Settings mSettings = Settings.newInstance(mCypherId, mCypher, mKey);
+                Settings mSettings = Settings.newInstance(mCypherId, "" + mCypher, mKey);
                 mSettings.setTargetFragment(EncryptionFragment.this, REQUEST_CYPHER);
                 mSettings.show(getActivity().getSupportFragmentManager(), TAG);
             }
@@ -67,15 +70,14 @@ public class EncryptionFragment extends Fragment {
         mPlayButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                //cypher has not been configured
-                if(!isConfigured()){
+                //cypher has not been configured or empty text
+                if(!isConfigured() || mPlainTextEdit.getText().toString().isEmpty()){
                     showErrorDialog();
                     return;
                 }
 
-                mPlainTextEdit.setText(mCypher);
+                mPlainTextEdit.setText(mCypher.encrypt(mPlainTextEdit.getText().toString(), mKey));
                 //FIXMe delete lol
-
                 //card increase in length
                 //showing a textview where decrypted text is shown (phase 1)
                 //shows how text is encrypted (phase 2)
@@ -92,10 +94,28 @@ public class EncryptionFragment extends Fragment {
         }
 
         if(requestCode == REQUEST_CYPHER){
-            mCypher = data.getStringExtra(Settings.SELECTED_CYPHER);
+            String cypherString = data.getStringExtra(Settings.SELECTED_CYPHER);
+            setCypher(cypherString);
+
             mCypherId = data.getIntExtra(Settings.SELECTED_ID, 0);
             mKey = data.getStringExtra(Settings.KEY);
         }
+    }
+
+    private void setCypher(String cypherString){
+        try {
+            Class cypherClass = Class.forName(getString(R.string.packageName) + cypherString);
+            mCypher = (Cypher) cypherClass.getConstructors()[0].newInstance();
+        } catch (ClassNotFoundException e) {
+
+        } catch (IllegalAccessException e) {
+            e.printStackTrace();
+        } catch (java.lang.InstantiationException e) {
+            e.printStackTrace();
+        } catch (InvocationTargetException e) {
+            e.printStackTrace();
+        }
+
     }
 
     private boolean isConfigured(){
@@ -109,7 +129,7 @@ public class EncryptionFragment extends Fragment {
 
     private void showErrorDialog(){
         AlertDialog errorDialog = new AlertDialog.Builder(getActivity())
-                .setMessage("Please configure the cypher before encrypting the message.")
+                .setMessage("Please add a valid text or configure the cypher before attempting to encrypt.")
                 .setTitle("Not configured")
                 .setPositiveButton(R.string.ok, new DialogInterface.OnClickListener() {
                     @Override
