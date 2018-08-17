@@ -39,6 +39,11 @@ public class Caesar implements Cypher {
         return "https://en.wikipedia.org/wiki/Caesar_cipher";
     }
 
+    @Override
+    public String toString(){
+        return "Caesar";
+    }
+
     private String modify(String text, int shift) {
 
         StringBuilder builder = new StringBuilder();
