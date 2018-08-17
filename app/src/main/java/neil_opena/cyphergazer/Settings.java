@@ -32,15 +32,20 @@ public class Settings extends DialogFragment {
             "neil_opena.cyphergazer.cypher";
     public static final String SELECTED_ID =
             "neil-opena.cyphergazer.id";
+    public static final String KEY =
+            "neil-opena.cyphergazer.key";
 
     private Chip mSelectedChip;
     private ChipGroup mChipGroup;
-    private TextInputEditText mKey;
+    private TextInputEditText mKeyInput;
 
-    public static Settings newInstance(int cypherId, String cypher){
+    private String mCurrentKey;
+
+    public static Settings newInstance(int cypherId, String cypher, String key){
         Settings dialog = new Settings();
 
         Bundle args = new Bundle();
+        args.putString(KEY, key);
         args.putString(SELECTED_CYPHER, cypher);
         args.putInt(SELECTED_ID, cypherId);
         dialog.setArguments(args);
@@ -55,8 +60,10 @@ public class Settings extends DialogFragment {
 
         final View v = inflater.inflate(R.layout.layout_dialog, null);
 
-        mKey = v.findViewById(R.id.key);
-        mKey.setOnFocusChangeListener(new View.OnFocusChangeListener() {
+        mCurrentKey = getArguments().getString(KEY);
+        mKeyInput = v.findViewById(R.id.key);
+        mKeyInput.setText(mCurrentKey);
+        mKeyInput.setOnFocusChangeListener(new View.OnFocusChangeListener() {
             @Override
             public void onFocusChange(View v, boolean hasFocus) {
                 hideKeyBoard(v);
@@ -73,7 +80,7 @@ public class Settings extends DialogFragment {
                     Class toCheck = Class.forName(classToCheck);
                     Cypher instance = (Cypher) (toCheck.getConstructors()[0].newInstance());
                     if(instance.hasNumericalKey()){
-                        mKey.setInputType(InputType.TYPE_CLASS_NUMBER);
+                        mKeyInput.setInputType(InputType.TYPE_CLASS_NUMBER);
                     }
                 } catch (ClassNotFoundException e) {
                 } catch (IllegalAccessException e) {
@@ -83,13 +90,11 @@ public class Settings extends DialogFragment {
             }
         });
 
-
         int cypherId = getArguments().getInt(SELECTED_ID);
         if(cypherId != 0){
             mSelectedChip = v.findViewById(cypherId);
             mSelectedChip.setChecked(true);
         }
-
 
         builder.setView(v)
                 .setPositiveButton(R.string.ok, new DialogInterface.OnClickListener() {
@@ -97,8 +102,14 @@ public class Settings extends DialogFragment {
                     public void onClick(DialogInterface dialog, int id) {
                         //save
                         int chipId = mChipGroup.getCheckedChipId();
-                        String cypher = ((Chip) v.findViewById(chipId)).getText().toString();
-                        sendResult(Activity.RESULT_OK, chipId, cypher);
+                        Chip chipTest = v.findViewById(chipId);
+                        String cypher = null;
+                        if(chipTest != null){
+                            cypher = chipTest.getText().toString();
+                        }
+                        String key = mKeyInput.getText().toString();
+
+                        sendResult(Activity.RESULT_OK, chipId, cypher, key);
                     }
                 })
                 .setNegativeButton(R.string.cancel, new DialogInterface.OnClickListener() {
@@ -115,7 +126,7 @@ public class Settings extends DialogFragment {
         imm.hideSoftInputFromWindow(v.getWindowToken(), 0);
     }
 
-    private void sendResult(int resultCode, int cypherId, String cypher){
+    private void sendResult(int resultCode, int cypherId, String cypher, String currentKey){
         if(getTargetFragment() == null){
             return;
         }
@@ -123,6 +134,7 @@ public class Settings extends DialogFragment {
         Intent intent = new Intent();
         intent.putExtra(SELECTED_ID, cypherId);
         intent.putExtra(SELECTED_CYPHER, cypher);
+        intent.putExtra(KEY, currentKey);
 
         getTargetFragment().onActivityResult(getTargetRequestCode(), resultCode, intent);
     }

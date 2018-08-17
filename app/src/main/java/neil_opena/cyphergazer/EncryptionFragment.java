@@ -4,20 +4,17 @@ import android.app.Activity;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
-import android.hardware.input.InputManager;
 import android.os.Bundle;
 
 import androidx.appcompat.app.AlertDialog;
 import androidx.fragment.app.Fragment;
 
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.inputmethod.InputMethodManager;
 
 import com.google.android.material.button.MaterialButton;
-import com.google.android.material.chip.Chip;
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
 import com.google.android.material.textfield.TextInputEditText;
 
@@ -32,6 +29,7 @@ public class EncryptionFragment extends Fragment {
     private MaterialButton mSettingsButton;
 
     private String mCypher;
+    private String mKey;
     private int mCypherId;
 
     public static EncryptionFragment newInstance(){
@@ -59,7 +57,7 @@ public class EncryptionFragment extends Fragment {
         mSettingsButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                Settings mSettings = Settings.newInstance(mCypherId, mCypher);
+                Settings mSettings = Settings.newInstance(mCypherId, mCypher, mKey);
                 mSettings.setTargetFragment(EncryptionFragment.this, REQUEST_CYPHER);
                 mSettings.show(getActivity().getSupportFragmentManager(), TAG);
             }
@@ -72,6 +70,7 @@ public class EncryptionFragment extends Fragment {
                 //cypher has not been configured
                 if(!isConfigured()){
                     showErrorDialog();
+                    return;
                 }
 
                 mPlainTextEdit.setText(mCypher);
@@ -95,13 +94,12 @@ public class EncryptionFragment extends Fragment {
         if(requestCode == REQUEST_CYPHER){
             mCypher = data.getStringExtra(Settings.SELECTED_CYPHER);
             mCypherId = data.getIntExtra(Settings.SELECTED_ID, 0);
+            mKey = data.getStringExtra(Settings.KEY);
         }
     }
 
     private boolean isConfigured(){
-        return mCypher != null;
-        //FIXMe
-        //also return if key exists
+        return mCypher != null && !mKey.isEmpty();
     }
 
     private void hideKeyBoard(View v){
