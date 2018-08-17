@@ -1,14 +1,21 @@
 <resources>
     <string name="app_name">Cypher Gazer</string>
-    <string name="app_description">Encode or decode information while observing how it all works!</string>
+
     <string name="encrypt">Encrypt</string>
     <string name="encrypt_hint">Message Encryption</string>
     <string name="decrypt">Decrypt</string>
     <string name="decrypt_hint">Message Decryption</string>
+
     <string name="message_error">Please enter a valid message.</string>
 
     <string name="help">Help</string>
-    <string name="cypher">Cypher:</string>
-    <string name="key">Key:</string>
+    <string name="ok">OK</string>
+    <string name="cancel">CANCEL</string>
+
+    <string-array name="cyphers">
+        <item name="cypher_caesar">Caesar</item>
+
+
+    </string-array>
 
 </resources>
