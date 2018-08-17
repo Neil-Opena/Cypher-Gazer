@@ -1,7 +1,9 @@
 package neil_opena.cyphergazer;
 
+import android.app.Activity;
 import android.content.Context;
 import android.content.DialogInterface;
+import android.content.Intent;
 import android.hardware.input.InputManager;
 import android.os.Bundle;
 
@@ -15,6 +17,7 @@ import android.view.ViewGroup;
 import android.view.inputmethod.InputMethodManager;
 
 import com.google.android.material.button.MaterialButton;
+import com.google.android.material.chip.Chip;
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
 import com.google.android.material.textfield.TextInputEditText;
 
@@ -22,12 +25,14 @@ public class EncryptionFragment extends Fragment {
 
     public static final String TAG = "EncryptionFragment";
 
+    private static final int REQUEST_CYPHER = 0;
+
     private TextInputEditText mPlainTextEdit;
     private FloatingActionButton mPlayButton;
     private MaterialButton mSettingsButton;
-    private Settings mSettings;
 
-    private boolean mConfigured;
+    private String mCypher;
+    private int mCypherId;
 
     public static EncryptionFragment newInstance(){
         return new EncryptionFragment();
@@ -50,13 +55,13 @@ public class EncryptionFragment extends Fragment {
             }
         });
 
-        mSettings = new Settings();
         mSettingsButton = v.findViewById(R.id.settings_btn);
         mSettingsButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
+                Settings mSettings = Settings.newInstance(mCypherId, mCypher);
+                mSettings.setTargetFragment(EncryptionFragment.this, REQUEST_CYPHER);
                 mSettings.show(getActivity().getSupportFragmentManager(), TAG);
-                Log.i(TAG,"" +  ((CypherGazerActivity) getActivity()).getCypherList().size());
             }
         });
 
@@ -65,7 +70,7 @@ public class EncryptionFragment extends Fragment {
             @Override
             public void onClick(View v) {
                 //cypher has not been configured
-                if(!mConfigured){
+                if(!isConfigured()){
                     showErrorDialog();
                 }
 
@@ -76,6 +81,25 @@ public class EncryptionFragment extends Fragment {
         });
 
         return v;
+    }
+
+    @Override
+    public void onActivityResult(int requestCode, int resultCode, Intent data){
+        if(resultCode != Activity.RESULT_OK){
+            return;
+        }
+
+        if(requestCode == REQUEST_CYPHER){
+            mCypher = data.getStringExtra(Settings.SELECTED_CYPHER);
+            mCypherId = data.getIntExtra(Settings.SELECTED_ID, 0);
+            mPlainTextEdit.setText(mCypher);
+        }
+    }
+
+    private boolean isConfigured(){
+        return mCypher != null;
+        //FIXMe
+        //also return if key exists
     }
 
     private void hideKeyBoard(View v){

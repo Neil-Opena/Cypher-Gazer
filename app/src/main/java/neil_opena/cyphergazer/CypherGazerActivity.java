@@ -9,12 +9,7 @@ import android.view.MenuItem;
 
 import com.google.android.material.tabs.TabLayout;
 
-import java.io.File;
-import java.lang.reflect.InvocationTargetException;
-import java.nio.file.Path;
-import java.nio.file.Paths;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 
 import androidx.appcompat.app.AppCompatActivity;
@@ -23,7 +18,6 @@ import androidx.fragment.app.Fragment;
 import androidx.fragment.app.FragmentManager;
 import androidx.fragment.app.FragmentStatePagerAdapter;
 import androidx.viewpager.widget.ViewPager;
-import neil_opena.cyphergazer.Cyphers.Cypher;
 
 public class CypherGazerActivity extends AppCompatActivity {
 
@@ -32,7 +26,6 @@ public class CypherGazerActivity extends AppCompatActivity {
     private ViewPager mViewPager;
 
     private List<tabItem> mTabItemList = new ArrayList<>();
-    private List<Cypher> mCypherList = new ArrayList<>();
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -67,8 +60,6 @@ public class CypherGazerActivity extends AppCompatActivity {
 
         mTabLayout.setupWithViewPager(mViewPager);
         setUpTabs();
-
-        setUpCyphers();
     }
 
     @Override
@@ -86,10 +77,6 @@ public class CypherGazerActivity extends AppCompatActivity {
             default:
                 return super.onOptionsItemSelected(item);
         }
-    }
-
-    public List<Cypher> getCypherList(){
-        return mCypherList;
     }
 
     private class tabItem{
@@ -118,23 +105,4 @@ public class CypherGazerActivity extends AppCompatActivity {
         }
     }
 
-    private void setUpCyphers(){
-        ArrayList<String> stringList = new ArrayList<>(Arrays.asList(getResources().getStringArray(R.array.cyphers)));
-        for(String string : stringList){
-            try{
-                string = getString(R.string.cypher_package) + string;
-                Class cypherClass = Class.forName(string);
-                Cypher cypherInstance = (Cypher) cypherClass.getConstructors()[0].newInstance();
-                mCypherList.add(cypherInstance);
-            }catch(ClassNotFoundException ex){
-
-            }catch (IllegalAccessException e) {
-
-            } catch (InstantiationException e) {
-
-            } catch (InvocationTargetException e) {
-
-            }
-        }
-    }
 }

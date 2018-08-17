@@ -6,7 +6,7 @@ package neil_opena.cyphergazer.Cyphers;
  *
  * @author Neil Opena
  */
-public class Caesar implements Cypher {
+public class Caesar2 implements Cypher {
     /*
     To simplify the cypher:
 

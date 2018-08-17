@@ -7,4 +7,6 @@ public interface Cypher {
     String decrypt(String cypherText, String key);
 
     String getArticleLink();
+
+    boolean hasNumericalKey();
 }

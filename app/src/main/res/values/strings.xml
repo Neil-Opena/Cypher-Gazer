@@ -2,21 +2,22 @@
     <string name="app_name">Cypher Gazer</string>
 
     <string name="encrypt">Encrypt</string>
-    <string name="encrypt_hint">Message Encryption</string>
+    <string name="encrypt_hint">Message to Encrypt</string>
     <string name="decrypt">Decrypt</string>
-    <string name="decrypt_hint">Message Decryption</string>
+    <string name="decrypt_hint">Message to Decrypt</string>
 
     <string name="message_error">Please enter a valid message.</string>
+    <string name="key_error">Please enter a valid key.</string>
 
     <string name="help">Help</string>
     <string name="ok">OK</string>
     <string name="cancel">CANCEL</string>
 
-    <string name="cypher_package">neil_opena.cyphergazer.Cyphers.</string>
-    <string-array name="cyphers">
-        <item name="cypher_caesar">Caesar</item>
+    <string name="cypher">Cypher</string>
+    <string name="key">Key</string>
 
-
-    </string-array>
+    <!-- Cyphers -->
+    <string name="cypher_caesar">Caesar</string>
+    <string name="cypher_caesar2">Caesar2</string>
 
 </resources>
