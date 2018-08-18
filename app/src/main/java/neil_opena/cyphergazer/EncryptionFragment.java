@@ -20,6 +20,9 @@ import com.google.android.material.floatingactionbutton.FloatingActionButton;
 import com.google.android.material.textfield.TextInputEditText;
 
 import java.lang.reflect.InvocationTargetException;
+import java.util.Arrays;
+import java.util.HashMap;
+import java.util.LinkedHashMap;
 
 public class EncryptionFragment extends Fragment {
 
@@ -31,6 +34,8 @@ public class EncryptionFragment extends Fragment {
     private FloatingActionButton mPlayButton;
     private MaterialButton mSettingsButton;
 
+    private HashMap<String, Cypher> mCypherMap = new LinkedHashMap<>();
+
     private Cypher mCypher;
     private String mKey;
     private int mCypherId;
@@ -41,7 +46,9 @@ public class EncryptionFragment extends Fragment {
 
     @Override
     public void onCreate(Bundle savedInstanceState){
+
         super.onCreate(savedInstanceState);
+        setUpCyphers();
     }
 
     @Override
@@ -60,7 +67,7 @@ public class EncryptionFragment extends Fragment {
         mSettingsButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                Settings mSettings = Settings.newInstance(mCypherId, "" + mCypher, mKey);
+                Settings mSettings = Settings.newInstance(mCypherMap, mCypherId, "" + mCypher, mKey);
                 mSettings.setTargetFragment(EncryptionFragment.this, REQUEST_CYPHER);
                 mSettings.show(getActivity().getSupportFragmentManager(), TAG);
             }
@@ -95,27 +102,26 @@ public class EncryptionFragment extends Fragment {
 
         if(requestCode == REQUEST_CYPHER){
             String cypherString = data.getStringExtra(Settings.SELECTED_CYPHER);
-            setCypher(cypherString);
-
+            mCypher = mCypherMap.get(cypherString);
             mCypherId = data.getIntExtra(Settings.SELECTED_ID, 0);
             mKey = data.getStringExtra(Settings.KEY);
         }
     }
 
-    private void setCypher(String cypherString){
-        try {
-            Class cypherClass = Class.forName(getString(R.string.packageName) + cypherString);
-            mCypher = (Cypher) cypherClass.getConstructors()[0].newInstance();
-        } catch (ClassNotFoundException e) {
-
-        } catch (IllegalAccessException e) {
-            e.printStackTrace();
-        } catch (java.lang.InstantiationException e) {
-            e.printStackTrace();
-        } catch (InvocationTargetException e) {
-            e.printStackTrace();
+    private void setUpCyphers(){
+        String[] stringArray = getResources().getStringArray(R.array.cyphers);
+        for(int i = 0; i < stringArray.length; i++){
+            String cypherXML = stringArray[i];
+            try{
+                Class cypherClass = Class.forName(getString(R.string.packageName) + cypherXML);
+                Cypher instance = (Cypher) cypherClass.getConstructors()[0].newInstance();
+                mCypherMap.put(cypherXML, instance);
+            } catch (ClassNotFoundException e) {
+            } catch (IllegalAccessException e) {
+            } catch (java.lang.InstantiationException e) {
+            } catch (InvocationTargetException e) {
+            }
         }
-
     }
 
     private boolean isConfigured(){

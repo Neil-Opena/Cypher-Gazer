@@ -17,6 +17,11 @@
     <string name="key">Key</string>
 
     <!-- Cyphers -->
+    <string-array name="cyphers">
+        <item name="cypher_caesar">Caesar</item>
+        <item name="cypher_caesar2">Caesar2</item>
+    </string-array>
+
     <string name="cypher_caesar">Caesar</string>
     <string name="cypher_caesar2">Caesar2</string>
     <string name="packageName">neil_opena.cyphergazer.Cyphers.</string>

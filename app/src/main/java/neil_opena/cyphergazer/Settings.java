@@ -7,20 +7,15 @@ import android.content.DialogInterface;
 import android.content.Intent;
 import android.os.Bundle;
 import android.text.InputType;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.inputmethod.InputMethodManager;
-import android.widget.Toast;
 
 import com.google.android.material.chip.Chip;
 import com.google.android.material.chip.ChipGroup;
 import com.google.android.material.textfield.TextInputEditText;
 
-import java.lang.reflect.InvocationTargetException;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
+import java.util.HashMap;
 
 import androidx.appcompat.app.AlertDialog;
 import androidx.fragment.app.DialogFragment;
@@ -34,14 +29,15 @@ public class Settings extends DialogFragment {
             "neil-opena.cyphergazer.id";
     public static final String KEY =
             "neil-opena.cyphergazer.key";
+    private static HashMap<String, Cypher> mCypherMap;
 
     private Chip mSelectedChip;
     private ChipGroup mChipGroup;
     private TextInputEditText mKeyInput;
 
     private String mCurrentKey;
-
-    public static Settings newInstance(int cypherId, String cypher, String key){
+    public static Settings newInstance(HashMap<String, Cypher> map, int cypherId, String cypher, String key){
+        mCypherMap = map;
         Settings dialog = new Settings();
 
         Bundle args = new Bundle();
@@ -75,17 +71,12 @@ public class Settings extends DialogFragment {
             @Override
             public void onCheckedChanged(ChipGroup chipGroup, int i) {
                 mSelectedChip = v.findViewById(i);
-                try {
-                    String classToCheck = getString(R.string.packageName) + mSelectedChip.getText().toString();
-                    Class toCheck = Class.forName(classToCheck);
-                    Cypher instance = (Cypher) (toCheck.getConstructors()[0].newInstance());
-                    if(instance.hasNumericalKey()){
-                        mKeyInput.setInputType(InputType.TYPE_CLASS_NUMBER);
-                    }
-                } catch (ClassNotFoundException e) {
-                } catch (IllegalAccessException e) {
-                } catch (java.lang.InstantiationException e) {
-                } catch (InvocationTargetException e) {
+                String cypherXMLCheck = mSelectedChip.getText().toString();
+                Cypher cypherTest = mCypherMap.get(cypherXMLCheck);
+                if(cypherTest.hasNumericalKey()){
+                    mKeyInput.setInputType(InputType.TYPE_CLASS_NUMBER);
+                }else{
+                    mKeyInput.setInputType(InputType.TYPE_TEXT_FLAG_CAP_CHARACTERS);
                 }
             }
         });
