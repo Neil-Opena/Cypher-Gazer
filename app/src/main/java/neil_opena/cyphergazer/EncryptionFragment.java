@@ -1,5 +1,8 @@
 package neil_opena.cyphergazer;
 
+import android.animation.Animator;
+import android.animation.AnimatorListenerAdapter;
+import android.animation.ObjectAnimator;
 import android.app.Activity;
 import android.content.Context;
 import android.content.DialogInterface;
@@ -13,11 +16,15 @@ import neil_opena.cyphergazer.Cyphers.Cypher;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.view.animation.AnimationUtils;
 import android.view.inputmethod.InputMethodManager;
+import android.widget.LinearLayout;
+import android.widget.TextView;
 
 import com.google.android.material.button.MaterialButton;
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
 import com.google.android.material.textfield.TextInputEditText;
+import com.google.android.material.textfield.TextInputLayout;
 
 import java.lang.reflect.InvocationTargetException;
 import java.util.Arrays;
@@ -31,8 +38,13 @@ public class EncryptionFragment extends Fragment {
     private static final int REQUEST_CYPHER = 0;
 
     private TextInputEditText mPlainTextEdit;
+    private TextInputEditText mCryptTextEdit;
+    private TextInputLayout mPlainTextLayout;
+    private TextInputLayout mCryptTextLayout;
+    private TextInputLayout mHiddenLayout;
     private FloatingActionButton mPlayButton;
     private MaterialButton mSettingsButton;
+    private LinearLayout mLettersContainer;
 
     private HashMap<String, Cypher> mCypherMap = new LinkedHashMap<>();
 
@@ -55,6 +67,14 @@ public class EncryptionFragment extends Fragment {
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         View v = inflater.inflate(R.layout.fragment_encrypt, container, false);
 
+        mPlainTextLayout = v.findViewById(R.id.plain_text_layout);
+        mCryptTextLayout = v.findViewById(R.id.crypt_text_layout);
+        mCryptTextLayout.setVisibility(View.GONE);
+        mHiddenLayout = v.findViewById(R.id.hidden_crypt_text_layout);
+        mHiddenLayout.setVisibility(View.GONE);
+        mLettersContainer = v.findViewById(R.id.letters_container);
+        setUpLetterContainer();
+
         mPlainTextEdit = v.findViewById(R.id.plain_text);
         mPlainTextEdit.setOnFocusChangeListener(new View.OnFocusChangeListener() {
             @Override
@@ -63,10 +83,14 @@ public class EncryptionFragment extends Fragment {
             }
         });
 
+        mCryptTextEdit = v.findViewById(R.id.crypt_text);
+        mCryptTextEdit.setEnabled(false);
+
         mSettingsButton = v.findViewById(R.id.settings_btn);
         mSettingsButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
+                v.requestFocusFromTouch();
                 Settings mSettings = Settings.newInstance(mCypherMap, mCypherId, "" + mCypher, mKey);
                 mSettings.setTargetFragment(EncryptionFragment.this, REQUEST_CYPHER);
                 mSettings.show(getActivity().getSupportFragmentManager(), TAG);
@@ -83,13 +107,28 @@ public class EncryptionFragment extends Fragment {
                     return;
                 }
 
-                mPlainTextEdit.setText(mCypher.encrypt(mPlainTextEdit.getText().toString(), mKey));
+                v.requestFocusFromTouch();
+
+                showHiddenLayout();
+                mCryptTextEdit.setText(mCypher.encrypt(mPlainTextEdit.getText().toString(), mKey));
+                mPlainTextEdit.setEnabled(false);
                 //FIXMe delete lol
                 //card increase in length
                 //showing a textview where decrypted text is shown (phase 1)
                 //shows how text is encrypted (phase 2)
+
+                /*
+                animate:
+
+
+                play --> fast forward --> rewind
+
+                when played: cant edit text until rewind button pressed
+                 */
             }
         });
+
+        autoFill();
 
         return v;
     }
@@ -133,10 +172,56 @@ public class EncryptionFragment extends Fragment {
         imm.hideSoftInputFromWindow(v.getWindowToken(), 0);
     }
 
+    private void showHiddenLayout(){
+        mHiddenLayout.setVisibility(View.INVISIBLE);
+        mCryptTextLayout.setVisibility(View.VISIBLE);
+        mCryptTextLayout.setAlpha(0.0f);
+
+        mCryptTextLayout.animate()
+                .translationY(mPlainTextLayout.getHeight() + mSettingsButton.getHeight() + mLettersContainer.getHeight())
+                .alpha(1.0f)
+                .setListener(null);
+    }
+
+    private void hideHiddenLayout(){
+        mHiddenLayout.setVisibility(View.GONE);
+        mCryptTextLayout.setAlpha(0.0f);
+
+        mCryptTextLayout.animate()
+                .translationY(-mPlainTextEdit.getHeight() - mSettingsButton.getHeight() - mLettersContainer.getHeight())
+                .alpha(1.0f)
+                .setListener(new AnimatorListenerAdapter() {
+                    @Override
+                    public void onAnimationEnd(Animator animation) {
+                        mCryptTextLayout.setVisibility(View.GONE);
+                    }
+                });
+    }
+
+    private void setUpLetterContainer(){
+        for(int i = 0; i < mLettersContainer.getChildCount(); i++){
+            LinearLayout letterContainer = (LinearLayout) mLettersContainer.getChildAt(i);
+
+            TextView plainLetter = (TextView) letterContainer.getChildAt(0);
+            TextView cryptLetter = (TextView) letterContainer.getChildAt(1);
+            char letter = (char) ('A' + i);
+            plainLetter.setText("" + letter);
+            cryptLetter.setText("" + letter);
+        }
+    }
+
+    //FIXME DELETE
+    private void autoFill(){
+        mPlainTextEdit.setText("ABC");
+        mCypher = mCypherMap.get("Caesar");
+        mKey = "1";
+    }
+
+    //FIXME PUT STRINGS IN RESOURCE FILE
     private void showErrorDialog(){
         AlertDialog errorDialog = new AlertDialog.Builder(getActivity())
                 .setMessage("Please add a valid text or configure the cypher before attempting to encrypt.")
-                .setTitle("Not configured")
+                .setTitle("Not valid")
                 .setPositiveButton(R.string.ok, new DialogInterface.OnClickListener() {
                     @Override
                     public void onClick(DialogInterface dialog, int which) {
@@ -146,4 +231,9 @@ public class EncryptionFragment extends Fragment {
                 .create();
         errorDialog.show();
     }
+
+    /*
+    For each letter in the text view:
+        color each text
+     */
 }

@@ -67,6 +67,9 @@ public class Settings extends DialogFragment {
         });
 
         mChipGroup = v.findViewById(R.id.cypher_group);
+        for(int i = 0; i < mChipGroup.getChildCount(); i++){
+            ((Chip) mChipGroup.getChildAt(i)).setText(getResources().getStringArray(R.array.cyphers)[i]);
+        }
         mChipGroup.setOnCheckedChangeListener(new ChipGroup.OnCheckedChangeListener() {
             @Override
             public void onCheckedChanged(ChipGroup chipGroup, int i) {
