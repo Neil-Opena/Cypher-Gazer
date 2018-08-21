@@ -7,12 +7,16 @@ import android.app.Activity;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
+import android.graphics.Color;
+import android.os.AsyncTask;
 import android.os.Bundle;
 
 import androidx.appcompat.app.AlertDialog;
 import androidx.fragment.app.Fragment;
 import neil_opena.cyphergazer.Cyphers.Cypher;
 
+import android.text.SpannableStringBuilder;
+import android.text.style.ForegroundColorSpan;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -110,13 +114,8 @@ public class EncryptionFragment extends Fragment {
                 v.requestFocusFromTouch();
 
                 showHiddenLayout();
-                mCryptTextEdit.setText(mCypher.encrypt(mPlainTextEdit.getText().toString(), mKey));
+                new EncryptTask().execute();
                 mPlainTextEdit.setEnabled(false);
-                //FIXMe delete lol
-                //card increase in length
-                //showing a textview where decrypted text is shown (phase 1)
-                //shows how text is encrypted (phase 2)
-
                 /*
                 animate:
 
@@ -212,16 +211,15 @@ public class EncryptionFragment extends Fragment {
 
     //FIXME DELETE
     private void autoFill(){
-        mPlainTextEdit.setText("ABC");
+        mPlainTextEdit.setText("ABCDEFGHIJKLMNOPQRSTUVWXYZ");
         mCypher = mCypherMap.get("Caesar");
         mKey = "1";
     }
 
-    //FIXME PUT STRINGS IN RESOURCE FILE
     private void showErrorDialog(){
         AlertDialog errorDialog = new AlertDialog.Builder(getActivity())
-                .setMessage("Please add a valid text or configure the cypher before attempting to encrypt.")
-                .setTitle("Not valid")
+                .setMessage(R.string.error_not_valid_message)
+                .setTitle(R.string.error_not_valid_title)
                 .setPositiveButton(R.string.ok, new DialogInterface.OnClickListener() {
                     @Override
                     public void onClick(DialogInterface dialog, int which) {
@@ -236,4 +234,47 @@ public class EncryptionFragment extends Fragment {
     For each letter in the text view:
         color each text
      */
+
+    /**
+     * Class is responsible for encrypting and visually displaying
+     * the encryption process to the user
+     */
+    private class EncryptTask extends AsyncTask<Void, Integer, Void>{
+
+        private String plainText;
+        private String cryptText;
+
+        @Override
+        protected Void doInBackground(Void... params){
+            plainText = mPlainTextEdit.getText().toString();
+            cryptText = mCypher.encrypt(plainText, mKey);
+
+            for(int i = 0; i < cryptText.length(); i++){
+                try {
+                    Thread.sleep(1000);
+                    publishProgress(i);
+                } catch (InterruptedException e) {
+
+                }
+            }
+
+            return null;
+        }
+
+        @Override
+        protected void onProgressUpdate(Integer... values) {
+            int curr = values[0];
+            int colorAccent = getResources().getColor(R.color.accent);
+            ForegroundColorSpan colorSpan = new ForegroundColorSpan(colorAccent);
+
+            mPlainTextEdit.getText().setSpan(colorSpan, curr, curr + 1, 0);
+
+            //mPlainTextEdit.getText().replace(values[0], values[0] + 1, "" + cryptText.charAt(values[0]));
+
+            mCryptTextEdit.append("" + cryptText.charAt(values[0]));
+            mCryptTextEdit.getText().setSpan(colorSpan, curr, curr + 1, 0);
+
+
+        }
+    }
 }

@@ -15,6 +15,9 @@
 
     <string name="cypher">Cypher</string>
     <string name="key">Key</string>
+    
+    <string name="error_not_valid_message">Please add a valid text or configure the cypher before attempting to encrypt.</string>
+    <string name="error_not_valid_title">Not Valid</string>
 
     <!-- Cyphers -->
     <string-array name="cyphers">
