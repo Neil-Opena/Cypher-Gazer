@@ -8,6 +8,7 @@ import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.graphics.Color;
+import android.graphics.drawable.Drawable;
 import android.os.AsyncTask;
 import android.os.Bundle;
 
@@ -17,6 +18,7 @@ import neil_opena.cyphergazer.Cyphers.Cypher;
 
 import android.text.SpannableStringBuilder;
 import android.text.style.ForegroundColorSpan;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -49,12 +51,14 @@ public class EncryptionFragment extends Fragment {
     private FloatingActionButton mPlayButton;
     private MaterialButton mSettingsButton;
     private LinearLayout mLettersContainer;
+    private LinearLayout mHiddenLettersContainer;
 
     private HashMap<String, Cypher> mCypherMap = new LinkedHashMap<>();
 
     private Cypher mCypher;
     private String mKey;
     private int mCypherId;
+    private EncryptTask mTask;
 
     public static EncryptionFragment newInstance(){
         return new EncryptionFragment();
@@ -65,6 +69,7 @@ public class EncryptionFragment extends Fragment {
 
         super.onCreate(savedInstanceState);
         setUpCyphers();
+        mTask = new EncryptTask();
     }
 
     @Override
@@ -77,7 +82,10 @@ public class EncryptionFragment extends Fragment {
         mHiddenLayout = v.findViewById(R.id.hidden_crypt_text_layout);
         mHiddenLayout.setVisibility(View.GONE);
         mLettersContainer = v.findViewById(R.id.letters_container);
+        mLettersContainer.setVisibility(View.GONE);
         setUpLetterContainer();
+        mHiddenLettersContainer = v.findViewById(R.id.hidden_letter_container);
+        mHiddenLettersContainer.setVisibility(View.GONE);
 
         mPlainTextEdit = v.findViewById(R.id.plain_text);
         mPlainTextEdit.setOnFocusChangeListener(new View.OnFocusChangeListener() {
@@ -114,7 +122,7 @@ public class EncryptionFragment extends Fragment {
                 v.requestFocusFromTouch();
 
                 showHiddenLayout();
-                new EncryptTask().execute();
+                mTask.execute();
                 mPlainTextEdit.setEnabled(false);
                 /*
                 animate:
@@ -146,6 +154,12 @@ public class EncryptionFragment extends Fragment {
         }
     }
 
+    @Override
+    public void onDestroy(){
+        super.onDestroy();
+        mTask.cancel(true);
+    }
+
     private void setUpCyphers(){
         String[] stringArray = getResources().getStringArray(R.array.cyphers);
         for(int i = 0; i < stringArray.length; i++){
@@ -172,14 +186,26 @@ public class EncryptionFragment extends Fragment {
     }
 
     private void showHiddenLayout(){
+        mSettingsButton.setVisibility(View.INVISIBLE);
         mHiddenLayout.setVisibility(View.INVISIBLE);
+        mHiddenLettersContainer.setVisibility(View.INVISIBLE);
         mCryptTextLayout.setVisibility(View.VISIBLE);
+        mLettersContainer.setVisibility(View.VISIBLE);
         mCryptTextLayout.setAlpha(0.0f);
+        mLettersContainer.setAlpha(0.0f);
 
-        mCryptTextLayout.animate()
-                .translationY(mPlainTextLayout.getHeight() + mSettingsButton.getHeight() + mLettersContainer.getHeight())
+        mLettersContainer.animate()
+                .translationY(mPlainTextLayout.getHeight() + mSettingsButton.getHeight())
                 .alpha(1.0f)
-                .setListener(null);
+                .setListener(new AnimatorListenerAdapter() {
+                    @Override
+                    public void onAnimationEnd(Animator animation) {
+                        mCryptTextLayout.animate()
+                                .translationY(mPlainTextLayout.getHeight() + mSettingsButton.getHeight() + mLettersContainer.getHeight())
+                                .alpha(1.0f)
+                                .setListener(null);
+                    }
+                });
     }
 
     private void hideHiddenLayout(){
@@ -211,9 +237,9 @@ public class EncryptionFragment extends Fragment {
 
     //FIXME DELETE
     private void autoFill(){
-        mPlainTextEdit.setText("ABCDEFGHIJKLMNOPQRSTUVWXYZ");
+        mPlainTextEdit.setText("THEQUICKBROWNFOXJUMPSOVERTHELAZYDOG");
         mCypher = mCypherMap.get("Caesar");
-        mKey = "1";
+        mKey = "23";
     }
 
     private void showErrorDialog(){
@@ -230,11 +256,6 @@ public class EncryptionFragment extends Fragment {
         errorDialog.show();
     }
 
-    /*
-    For each letter in the text view:
-        color each text
-     */
-
     /**
      * Class is responsible for encrypting and visually displaying
      * the encryption process to the user
@@ -243,6 +264,11 @@ public class EncryptionFragment extends Fragment {
 
         private String plainText;
         private String cryptText;
+        private int colorPrimaryDark = getResources().getColor(R.color.primary_dark);
+        private int colorPrimaryLight = getResources().getColor(R.color.primary_light);
+        private Drawable background = getResources().getDrawable(R.drawable.border);
+        private ForegroundColorSpan accentSpan = new ForegroundColorSpan(colorPrimaryDark);
+        private ForegroundColorSpan primarySpan = new ForegroundColorSpan(colorPrimaryLight);
 
         @Override
         protected Void doInBackground(Void... params){
@@ -251,7 +277,7 @@ public class EncryptionFragment extends Fragment {
 
             for(int i = 0; i < cryptText.length(); i++){
                 try {
-                    Thread.sleep(1000);
+                    Thread.sleep(500);
                     publishProgress(i);
                 } catch (InterruptedException e) {
 
@@ -263,18 +289,40 @@ public class EncryptionFragment extends Fragment {
 
         @Override
         protected void onProgressUpdate(Integer... values) {
+            super.onProgressUpdate(values);
             int curr = values[0];
-            int colorAccent = getResources().getColor(R.color.accent);
-            ForegroundColorSpan colorSpan = new ForegroundColorSpan(colorAccent);
 
-            mPlainTextEdit.getText().setSpan(colorSpan, curr, curr + 1, 0);
-
-            //mPlainTextEdit.getText().replace(values[0], values[0] + 1, "" + cryptText.charAt(values[0]));
-
+            mPlainTextEdit.getText().setSpan(accentSpan, curr, curr + 1, 0);
             mCryptTextEdit.append("" + cryptText.charAt(values[0]));
-            mCryptTextEdit.getText().setSpan(colorSpan, curr, curr + 1, 0);
+            mCryptTextEdit.getText().setSpan(accentSpan, curr, curr + 1, 0);
 
 
+            int letterViewIndex = plainText.charAt(curr) - 'A';
+            mLettersContainer.getChildAt(letterViewIndex).setBackground(background);
+            if(curr > 0){
+                mPlainTextEdit.getText().setSpan(primarySpan, 0, curr, 0);
+                mCryptTextEdit.getText().setSpan(primarySpan, 0, curr, 0);
+                mLettersContainer.getChildAt(plainText.charAt(curr - 1) - 'A').setBackground(null);
+            }
+
+        }
+
+        @Override
+        protected void onPostExecute(Void aVoid) {
+            super.onPostExecute(aVoid);
+            colorFinalOutput();
+        }
+
+        @Override
+        protected void onCancelled() {
+            super.onCancelled();
+            colorFinalOutput();
+        }
+
+        private void colorFinalOutput(){
+            mLettersContainer.getChildAt(plainText.charAt(plainText.length() - 1) - 'A').setBackground(null);
+            mPlainTextEdit.getText().setSpan(primarySpan, 0, plainText.length(), 0);
+            mCryptTextEdit.getText().setSpan(primarySpan, 0, cryptText.length(), 0);
         }
     }
 }
