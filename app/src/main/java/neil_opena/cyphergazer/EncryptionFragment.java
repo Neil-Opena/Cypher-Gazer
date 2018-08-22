@@ -55,6 +55,14 @@ public class EncryptionFragment extends Fragment {
     private EncryptTask mEncryptTask;
     private ShiftTask mShiftTask;
 
+    private enum State{
+        DEFAULT,
+        ENCRYPTION,
+        END
+    }
+
+    private State mCurrentState;
+
     public static EncryptionFragment newInstance(){
         return new EncryptionFragment();
     }
@@ -66,6 +74,7 @@ public class EncryptionFragment extends Fragment {
         setUpCyphers();
         mEncryptTask = new EncryptTask();
         mShiftTask = new ShiftTask();
+        mCurrentState = State.DEFAULT;
     }
 
     @Override
@@ -109,17 +118,31 @@ public class EncryptionFragment extends Fragment {
         mPlayButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                //cypher has not been configured or empty text
-                if(!isConfigured() || mPlainTextEdit.getText().toString().isEmpty()){
-                    showErrorDialog();
-                    return;
-                }
-
                 v.requestFocusFromTouch();
-
                 showHiddenLayout();
+
+                //first verify if correct
                 mShiftTask.execute();
                 mPlainTextEdit.setEnabled(false);
+
+                switch(mCurrentState){
+                    case DEFAULT:
+                        if(!isConfigured() || mPlainTextEdit.getText().toString().isEmpty()){
+                            showErrorDialog(); //cypher has not been configured ot has empty text area
+                            return;
+                        }
+
+                        v.requestFocusFromTouch();
+                        showHiddenLayout();
+
+                        //verify if value is correct first!!
+                        mShiftTask.execute();
+                        mPlainTextEdit.setEnabled(false);
+
+                    case ENCRYPTION:
+                        mShiftTask.cancel(true);
+                        hideHiddenLayout();
+                }
                 /*
                 animate:
                 play --> fast forward --> rewind
@@ -181,13 +204,16 @@ public class EncryptionFragment extends Fragment {
     }
 
     private void showHiddenLayout(){
-        mSettingsButton.setVisibility(View.INVISIBLE);
         mHiddenLayout.setVisibility(View.INVISIBLE);
         mHiddenLettersContainer.setVisibility(View.INVISIBLE);
         mCryptTextLayout.setVisibility(View.VISIBLE);
         mLettersContainer.setVisibility(View.VISIBLE);
         mCryptTextLayout.setAlpha(0.0f);
         mLettersContainer.setAlpha(0.0f);
+
+
+        mSettingsButton.setText(R.string.key_indicator);
+        mSettingsButton.setEnabled(false);
 
         mLettersContainer.animate()
                 .translationY(mPlainTextLayout.getHeight() + mSettingsButton.getHeight())
@@ -257,6 +283,13 @@ public class EncryptionFragment extends Fragment {
     private class ShiftTask extends AsyncTask<Void, Integer, Void>{
 
         @Override
+        protected void onPreExecute() {
+            super.onPreExecute();
+            mSettingsButton.setText(getString(R.string.key_indicator_format, "" + 0));
+            mCurrentState = State.ENCRYPTION;
+        }
+
+        @Override
         protected Void doInBackground(Void... voids) {
             try {
                 Thread.sleep(1000);
@@ -264,7 +297,7 @@ public class EncryptionFragment extends Fragment {
                 for(int i = 0; i < key; i++){
                     Thread.sleep(250);
                     for(int j = 0; j < 26; j++){
-                        publishProgress(j);
+                        publishProgress(j, i + 1);
                     }
                 }
             } catch (InterruptedException e) {
@@ -276,14 +309,15 @@ public class EncryptionFragment extends Fragment {
         protected void onProgressUpdate(Integer... values) {
             super.onProgressUpdate(values);
 
-            int letterContainerIndex = values[0];
+            mSettingsButton.setText(getString(R.string.key_indicator_format, "" + values[1]));
 
+            //shift
+            int letterContainerIndex = values[0];
             TextView cryptLetter  = (TextView) ((LinearLayout) mLettersContainer.getChildAt(letterContainerIndex)).getChildAt(1);
             char character = (char) (1 + cryptLetter.getText().toString().charAt(0));
             if(character > 'Z'){
                 character = 'A';
             }
-            //add check for wrap around?
             cryptLetter.setText("" + character);
         }
 
@@ -309,9 +343,15 @@ public class EncryptionFragment extends Fragment {
         private ForegroundColorSpan primarySpan = new ForegroundColorSpan(colorPrimaryLight);
 
         @Override
-        protected Void doInBackground(Void... params){
+        protected void onPreExecute() {
+            super.onPreExecute();
+
             plainText = mPlainTextEdit.getText().toString();
             cryptText = mCypher.encrypt(plainText, mKey);
+        }
+
+        @Override
+        protected Void doInBackground(Void... params){
 
             //character sequence
             for(int i = 0; i < cryptText.length(); i++){
@@ -363,7 +403,6 @@ public class EncryptionFragment extends Fragment {
         }
 
         private void colorFinalOutput(){
-            //mLettersContainer.getChildAt(plainText.charAt(plainText.length() - 1) - 'A').setBackground(null);
             mPlainTextEdit.getText().setSpan(primarySpan, 0, plainText.length(), 0);
             mCryptTextEdit.getText().setSpan(primarySpan, 0, cryptText.length(), 0);
         }
