@@ -118,13 +118,6 @@ public class EncryptionFragment extends Fragment {
         mPlayButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                v.requestFocusFromTouch();
-                showHiddenLayout();
-
-                //first verify if correct
-                mShiftTask.execute();
-                mPlainTextEdit.setEnabled(false);
-
                 switch(mCurrentState){
                     case DEFAULT:
                         if(!isConfigured() || mPlainTextEdit.getText().toString().isEmpty()){
@@ -138,10 +131,17 @@ public class EncryptionFragment extends Fragment {
                         //verify if value is correct first!!
                         mShiftTask.execute();
                         mPlainTextEdit.setEnabled(false);
-
-                    case ENCRYPTION:
+                        mCurrentState = State.ENCRYPTION;
+                        return;
+                    case ENCRYPTION: //currently shifting or encrypting
                         mShiftTask.cancel(true);
+                        mEncryptTask.cancel(true);
                         hideHiddenLayout();
+                        mCurrentState = State.END;
+                        return;
+                    case END: //encryption has finished
+                        mCurrentState = State.DEFAULT;
+                        return;
                 }
                 /*
                 animate:
@@ -286,7 +286,6 @@ public class EncryptionFragment extends Fragment {
         protected void onPreExecute() {
             super.onPreExecute();
             mSettingsButton.setText(getString(R.string.key_indicator_format, "" + 0));
-            mCurrentState = State.ENCRYPTION;
         }
 
         @Override
