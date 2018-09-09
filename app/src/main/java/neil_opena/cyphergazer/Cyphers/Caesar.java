@@ -6,7 +6,7 @@ package neil_opena.cyphergazer.Cyphers;
  *
  * @author Neil Opena
  */
-public class Caesar implements Cypher {
+public class Caesar extends Cypher {
     /*
     To simplify the cypher:
 
@@ -23,7 +23,7 @@ public class Caesar implements Cypher {
     public String encrypt(String plainText, String key) {
         try{
             int shift = Integer.parseInt(key);
-            return modify(plainText, shift);
+            return modify(removeWhiteSpace(plainText), shift);
         }catch (NumberFormatException ex){
             return null;
         }
@@ -33,7 +33,7 @@ public class Caesar implements Cypher {
     public String decrypt(String cypherText, String key) {
         try{
             int shift = Integer.parseInt(key);
-            return  modify(cypherText, -shift);
+            return  modify(removeWhiteSpace(cypherText), -shift);
         }catch (NumberFormatException ex){
             return null;
         }
@@ -48,6 +48,8 @@ public class Caesar implements Cypher {
     public String toString(){
         return "Caesar";
     }
+
+
 
     private String modify(String text, int shift) {
 

@@ -124,7 +124,7 @@ public class EncryptionFragment extends Fragment {
                             showErrorDialog(); //cypher has not been configured ot has empty text area
                             return;
                         }
-
+                        removeWhiteSpace();
                         v.requestFocusFromTouch();
                         showHiddenLayout();
 
@@ -176,6 +176,10 @@ public class EncryptionFragment extends Fragment {
         super.onDestroy();
         mShiftTask.cancel(true);
         mEncryptTask.cancel(true);
+    }
+
+    private void removeWhiteSpace(){
+        mPlainTextEdit.setText(mCypher.removeWhiteSpace(mPlainTextEdit.getText().toString()));
     }
 
     private void setUpCyphers(){
@@ -258,7 +262,7 @@ public class EncryptionFragment extends Fragment {
 
     //FIXME DELETE
     private void autoFill(){
-        mPlainTextEdit.setText("THEQUICKBROWNFOXJUMPSOVERTHELAZYDOG");
+        mPlainTextEdit.setText("THE QUICK BROWN FOX JUMPS OVER THE LAZY DOG");
         mCypher = mCypherMap.get("Caesar");
         mKey = "23";
     }
@@ -377,7 +381,6 @@ public class EncryptionFragment extends Fragment {
             mPlainTextEdit.getText().setSpan(accentSpan, curr, curr + 1, 0);
             mCryptTextEdit.append("" + cryptText.charAt(values[0]));
             mCryptTextEdit.getText().setSpan(accentSpan, curr, curr + 1, 0);
-
 
             int letterViewIndex = plainText.charAt(curr) - 'A';
             mLettersContainer.getChildAt(letterViewIndex).setBackground(background);

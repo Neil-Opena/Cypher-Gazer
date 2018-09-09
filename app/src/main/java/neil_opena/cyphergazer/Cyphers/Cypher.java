@@ -1,13 +1,24 @@
 package neil_opena.cyphergazer.Cyphers;
 
 
-public interface Cypher {
+public abstract class Cypher {
 
-    String encrypt(String plainText, String key);
+    public abstract String encrypt(String plainText, String key);
 
-    String decrypt(String cypherText, String key);
+    public abstract String decrypt(String cypherText, String key);
 
-    String getArticleLink();
+    public abstract String getArticleLink();
 
-    boolean hasNumericalKey();
+    public abstract boolean hasNumericalKey();
+
+    public String removeWhiteSpace(String text){
+        String temp = "";
+        for(int i = 0; i < text.length(); i++){
+            if(text.charAt(i) < 'A' || text.charAt(i) > 'Z'){
+                continue;
+            }
+            temp = temp + text.charAt(i);
+        }
+        return temp;
+    }
 }
